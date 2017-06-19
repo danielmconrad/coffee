@@ -21,3 +21,6 @@ class Screen:
 
   def write(self):
     self.text.WriteAll()
+
+  def clear(self):
+    self.text.Clear()

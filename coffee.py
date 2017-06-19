@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import atexit
 import screen
 import time
 import Adafruit_GPIO.SPI as SPI
@@ -14,6 +15,7 @@ class Coffee:
     self.last_ready = time.time()
     self.last_temp = 0
     self.thermocouple = MAX31856(software_spi=SOFTWARE_SPI)
+    atexit.register(self.screen.clear)
 
   def start(self):
     while True:
@@ -21,6 +23,12 @@ class Coffee:
 
       if temp >= READY_FLOOR:
         self.last_ready = time.time()
+
+      if temp == 32.0:
+        self.screen.update_header("Oh no!")
+        self.screen.update_body("There was a problem")
+        self.screen.update_footer("reading the temp.")
+        break
 
       self.last_temp = temp
 
@@ -44,7 +52,7 @@ class Coffee:
 
       if mins_ago == 0:
         return "Just brewed"
-      elif hours_ago > 1
+      elif hours_ago > 1:
         return "Brewed {0} hours ago".format(hours_ago)
       else:
         return "Brewed {0} mins ago".format(mins_ago)
@@ -60,6 +68,6 @@ class Coffee:
   def __get_f(self, celcius_temp):
     return celcius_temp * 9.0 / 5.0 + 32.0
 
-
-coffee = Coffee()
-coffee.start()
+if __name__ == "__main__":
+  coffee = Coffee()
+  coffee.start()
