@@ -10,7 +10,7 @@ SOFTWARE_SPI = {"clk": 13, "cs": 0, "do": 6, "di": 5}
 
 class Coffee:
   def __init__(self):
-    self.screen = screen.Screen()
+    self.screen = screen.Screen(180)
     self.last_ready = time.time()
     self.last_temp = 0
     self.thermocouple = MAX31856(software_spi=SOFTWARE_SPI)
@@ -40,9 +40,12 @@ class Coffee:
   def __get_body_message(self, temp):
     if temp < READY_FLOOR:
       mins_ago = int((time.time() - self.last_ready) / 60)
+      hours_ago = int(mins_ago / 60)
 
       if mins_ago == 0:
         return "Just brewed"
+      elif hours_ago > 1
+        return "Brewed {0} hours ago".format(hours_ago)
       else:
         return "Brewed {0} mins ago".format(mins_ago)
     else:
