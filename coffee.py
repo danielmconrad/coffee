@@ -6,7 +6,8 @@ import time
 import Adafruit_GPIO.SPI as SPI
 from Adafruit_MAX31856 import MAX31856 as MAX31856
 
-READY_FLOOR = 200
+READY_FLOOR = 195
+TEMP_DIFFERENTIAL = 4
 SOFTWARE_SPI = {"clk": 13, "cs": 0, "do": 6, "di": 5}
 
 class Coffee:
@@ -20,6 +21,7 @@ class Coffee:
   def start(self):
     while True:
       temp = int(self.__get_f(self.thermocouple.read_temp_c()))
+      temp += TEMP_DIFFERENTIAL
 
       if temp >= READY_FLOOR:
         self.last_ready = time.time()
