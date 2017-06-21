@@ -1,13 +1,15 @@
 #!/usr/bin/python
 
 import atexit
+import os
+import requests
 import screen
 import time
 import Adafruit_GPIO.SPI as SPI
 from Adafruit_MAX31856 import MAX31856 as MAX31856
 
 READY_FLOOR = 195
-TEMP_DIFFERENTIAL = 4
+TEMP_DIFFERENTIAL = 2
 SOFTWARE_SPI = {"clk": 13, "cs": 0, "do": 6, "di": 5}
 
 class Coffee:
@@ -22,6 +24,12 @@ class Coffee:
     while True:
       temp = int(self.__get_f(self.thermocouple.read_temp_c()))
       temp += TEMP_DIFFERENTIAL
+
+      if self.last_temp >= READY_FLOOR and temp < READY_FLOOR:
+        this.__send_status("Brewing!")
+
+      if self.last_temp < READY_FLOOR and temp >= READY_FLOOR:
+        this.__send_status("Ready to brew :D")
 
       if temp >= READY_FLOOR:
         self.last_ready = time.time()
@@ -40,6 +48,12 @@ class Coffee:
       self.screen.write()
 
       time.sleep(10)
+
+  def __send_status(self, message):
+    status_url = os.environ["COFFEE_STATUS_URL"]
+
+    if status_url != None:
+      r = requests.post(status_url, data={message: message})
 
   def __get_header_message(self, temp):
     if temp > READY_FLOOR:
