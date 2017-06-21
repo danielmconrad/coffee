@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import atexit
+import json
 import os
 import requests
 import screen
@@ -9,7 +10,7 @@ import Adafruit_GPIO.SPI as SPI
 from Adafruit_MAX31856 import MAX31856 as MAX31856
 
 READY_FLOOR = 195
-TEMP_DIFFERENTIAL = 2
+TEMP_DIFFERENTIAL = 4
 SOFTWARE_SPI = {"clk": 13, "cs": 0, "do": 6, "di": 5}
 
 class Coffee:
@@ -18,6 +19,7 @@ class Coffee:
     self.last_ready = time.time()
     self.last_temp = 0
     self.thermocouple = MAX31856(software_spi=SOFTWARE_SPI)
+    self.status_url = os.environ["COFFEE_STATUS_URL"]
     atexit.register(self.screen.clear)
 
   def start(self):
@@ -26,10 +28,10 @@ class Coffee:
       temp += TEMP_DIFFERENTIAL
 
       if self.last_temp >= READY_FLOOR and temp < READY_FLOOR:
-        this.__send_status("Brewing!")
+        self.__send_status("Brewing!")
 
       if self.last_temp < READY_FLOOR and temp >= READY_FLOOR:
-        this.__send_status("Ready to brew :D")
+        self.__send_status("Ready to brew :D")
 
       if temp >= READY_FLOOR:
         self.last_ready = time.time()
@@ -50,10 +52,9 @@ class Coffee:
       time.sleep(10)
 
   def __send_status(self, message):
-    status_url = os.environ["COFFEE_STATUS_URL"]
+    if self.status_url != None:
+      r = requests.post(self.status_url, data=json.dumps({"message": message}))
 
-    if status_url != None:
-      r = requests.post(status_url, data={message: message})
 
   def __get_header_message(self, temp):
     if temp > READY_FLOOR:
