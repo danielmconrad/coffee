@@ -28,10 +28,10 @@ class Coffee:
       temp += TEMP_DIFFERENTIAL
 
       if self.last_temp >= READY_FLOOR and temp < READY_FLOOR:
-        self.__send_status("Brewing!")
+        self.__send_status("brewing", "Brewing!")
 
       if self.last_temp < READY_FLOOR and temp >= READY_FLOOR:
-        self.__send_status("Ready to brew :D")
+        self.__send_status("ready", "Ready to brew :D")
 
       if temp >= READY_FLOOR:
         self.last_ready = time.time()
@@ -51,9 +51,12 @@ class Coffee:
 
       time.sleep(10)
 
-  def __send_status(self, message):
+  def __send_status(self, key, message):
     if self.status_url != None:
-      r = requests.post(self.status_url, data=json.dumps({"message": message}))
+      r = requests.post(self.status_url, data=json.dumps({
+        "key": key,
+        "message": message
+      }))
 
 
   def __get_header_message(self, temp):
