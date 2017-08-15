@@ -23,6 +23,8 @@ class Coffee:
     atexit.register(self.screen.clear)
 
   def start(self):
+    self.__send_status("start", "Started")
+
     while True:
       temp = int(self.__get_f(self.thermocouple.read_temp_c()))
       temp += TEMP_DIFFERENTIAL
